@@ -180,7 +180,35 @@
             <span class="prefix">CHF</span>
             <input type="number" id="eigenkapital" value="160000" min="0" step="10000" class="has-prefix" readonly style="color:var(--text-muted);cursor:not-allowed;">
           </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding:7px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);" id="bar-row">
+            <span style="font-size:13px;color:var(--text-muted);">mind. in Bar (10%)</span>
+            <span style="font-size:13px;font-weight:500;color:var(--accent);" id="out-bar">—</span>
+          </div>
         </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Tragbarkeit</p>
+      <div class="field-grid">
+        <div class="field">
+          <label>Bruttojahreseinkommen <span style="font-size:11px;color:var(--gold);">— Nettojahreseinkommen = abzgl. 15%</span></label>
+          <div class="input-wrap">
+            <span class="prefix">CHF</span>
+            <input type="number" id="bruttoeinkommen" value="200000" min="0" step="10000" class="has-prefix" oninput="calc()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Kalkulatorischer Zinssatz</label>
+          <div class="input-wrap">
+            <input type="number" id="kalk-zins" value="5.00" min="0" max="20" step="0.1" class="has-suffix" oninput="calc()">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem;padding:14px 16px;border-radius:8px;border:1px solid var(--border);" id="tragbarkeit-bar">
+        <span style="font-size:14px;color:var(--text-muted);">Tragbarkeit</span>
+        <span style="font-size:20px;font-family:'DM Serif Display',serif;font-weight:400;" id="out-tragbarkeit">—</span>
       </div>
     </div>
 
@@ -235,7 +263,7 @@
           <span class="brow-label" style="white-space:nowrap;">Nebenkosten / Monat</span>
           <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
             <div class="input-wrap" style="width:120px;" id="nk-pct-wrap">
-              <input type="number" id="nebenkosten-pct" value="0.75" min="0" max="20" step="0.05" class="has-suffix" oninput="calc()" readonly
+              <input type="number" id="nebenkosten-pct" value="0.75" min="0" max="20" step="0.05" class="has-suffix" oninput="calc()"
                 style="background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2);color:#fff;font-size:13px;padding:6px 28px 6px 10px;">
               <span class="suffix" style="color:rgba(255,255,255,0.5);font-size:12px;">%</span>
             </div>
@@ -291,6 +319,8 @@
       zins2:      parseFloat(document.getElementById('zins2').value) || 0,
       nkPct:      parseFloat(document.getElementById('nebenkosten-pct').value) || 0,
       nkChf:      parseFloat(document.getElementById('nebenkosten-chf').value) || 0,
+      brutto:     parseFloat(document.getElementById('bruttoeinkommen').value) || 0,
+      kalkZins:   parseFloat(document.getElementById('kalk-zins').value) || 0,
     };
   }
 
@@ -303,6 +333,8 @@
     document.getElementById('zins2').value = d.zins2;
     document.getElementById('nebenkosten-pct').value = d.nkPct;
     document.getElementById('nebenkosten-chf').value = d.nkChf;
+    document.getElementById('bruttoeinkommen').value = d.brutto;
+    document.getElementById('kalk-zins').value = d.kalkZins;
     var pct = d.nutzung === 'eigennutzung' ? 20 : 30;
     document.getElementById('ek-hint').textContent = '— ' + pct + '% des Kaufpreises';
     var isNeubau = d.objektart === 'neubau';
@@ -318,7 +350,9 @@
     var mZ2   = hyp2 * (d.zins2 / 100) / 12;
     var mTilg = hyp2 / 15 / 12;
     var mNk   = d.objektart === 'neubau' ? d.kaufpreis * (d.nkPct / 100) / 12 : d.nkChf;
-    return { hyp1: hyp1, hyp2: hyp2, mZ1: mZ1, mZ2: mZ2, mTilg: mTilg, mNk: mNk, mTotal: mZ1 + mZ2 + mTilg + mNk };
+    var bar   = d.nutzung === 'eigennutzung' ? d.eigenkapital / 2 : null;
+    var tragbarkeit = d.brutto > 0 ? (d.kaufpreis - d.eigenkapital) * (d.kalkZins / 100) / (d.brutto * 0.85) * 100 : null;
+    return { hyp1: hyp1, hyp2: hyp2, mZ1: mZ1, mZ2: mZ2, mTilg: mTilg, mNk: mNk, mTotal: mZ1 + mZ2 + mTilg + mNk, bar: bar, tragbarkeit: tragbarkeit };
   }
 
   // ── Tabs ───────────────────────────────────────────────────────────────────
@@ -395,6 +429,27 @@
     document.getElementById('out-m-tilgung').textContent = fmt(r.mTilg);
     document.getElementById('out-m-nk').textContent      = fmt(r.mNk);
     document.getElementById('out-m-total').textContent   = fmt(r.mTotal);
+    var barRow = document.getElementById('bar-row');
+    if (r.bar !== null) {
+      document.getElementById('out-bar').textContent = fmt(r.bar);
+      barRow.style.display = 'flex';
+    } else {
+      barRow.style.display = 'none';
+    }
+    var tEl = document.getElementById('out-tragbarkeit');
+    var tBar = document.getElementById('tragbarkeit-bar');
+    if (r.tragbarkeit !== null) {
+      var ok = r.tragbarkeit < 30;
+      tEl.textContent = r.tragbarkeit.toFixed(1) + '%';
+      tEl.style.color = ok ? '#1a6640' : '#c0392b';
+      tBar.style.background = ok ? '#eaf6f0' : '#fdecea';
+      tBar.style.borderColor = ok ? '#a8dbc5' : '#f5c0c0';
+    } else {
+      tEl.textContent = '—';
+      tEl.style.color = 'var(--text-muted)';
+      tBar.style.background = 'var(--surface)';
+      tBar.style.borderColor = 'var(--border)';
+    }
   }
 
   // ── Save & Compare ─────────────────────────────────────────────────────────
