@@ -178,7 +178,7 @@
           <label>Eigenkapital <span id="ek-hint" style="font-size:11px;color:var(--gold);">— 20% des Kaufpreises</span></label>
           <div class="input-wrap">
             <span class="prefix">CHF</span>
-            <input type="number" id="eigenkapital" value="160000" min="0" step="10000" class="has-prefix" readonly style="color:var(--text-muted);cursor:not-allowed;">
+            <input type="number" id="eigenkapital" value="160000" min="0" step="10000" class="has-prefix" oninput="calc()" style="color:var(--text);"">
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding:7px 10px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);" id="bar-row">
             <span style="font-size:13px;color:var(--text-muted);">mind. in Bar (10%)</span>
