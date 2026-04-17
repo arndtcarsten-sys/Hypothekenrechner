@@ -286,6 +286,17 @@
             <span class="brow-value" id="out-m-nk">—</span>
           </div>
         </div>
+        <div class="brow" style="align-items:center;gap:1rem;">
+          <span class="brow-label" style="white-space:nowrap;">Mieterträge / Monat</span>
+          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+            <div class="input-wrap" style="width:150px;">
+              <span class="prefix" style="color:rgba(255,255,255,0.5);font-size:12px;">CHF</span>
+              <input type="number" id="mietertraege-m" value="0" min="0" step="100" class="has-prefix" oninput="calc()"
+                style="background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2);color:#fff;font-size:13px;padding:6px 10px 6px 38px;">
+            </div>
+            <span class="brow-value" id="out-mietertraege" style="color:rgba(150,255,180,0.9);">—</span>
+          </div>
+        </div>
         <div class="brow total">
           <span class="brow-label">Total monatliche Belastung</span>
           <span class="brow-value" id="out-m-total">—</span>
@@ -381,6 +392,7 @@
       brutto:     parseFloat(document.getElementById('bruttoeinkommen').value) || 0,
       kalkZins:   parseFloat(document.getElementById('kalk-zins').value) || 0,
       mietertragM: parseFloat(document.getElementById('mietertrag-m').value) || 0,
+      mietertraegeM: parseFloat(document.getElementById('mietertraege-m').value) || 0,
     };
   }
 
@@ -396,6 +408,7 @@
     document.getElementById('bruttoeinkommen').value = d.brutto;
     document.getElementById('kalk-zins').value = d.kalkZins;
     document.getElementById('mietertrag-m').value = d.mietertragM;
+    document.getElementById('mietertraege-m').value = d.mietertraegeM;
     var pct = d.nutzung === 'eigennutzung' ? 20 : 30;
     document.getElementById('ek-hint').textContent = '— ' + pct + '% des Kaufpreises';
     var isNeubau = d.objektart === 'neubau';
@@ -419,7 +432,7 @@
     var ekRenditeBrutto = d.eigenkapital > 0 ? (mietBruttoJ / d.eigenkapital) * 100 : null;
     var bruttorendite   = d.kaufpreis > 0    ? (mietBruttoJ / d.kaufpreis) * 100 : null;
     var ekRenditeNetto  = d.eigenkapital > 0 ? ((mietNettoM * 12) / d.eigenkapital) * 100 : null;
-    return { hyp1: hyp1, hyp2: hyp2, mZ1: mZ1, mZ2: mZ2, mTilg: mTilg, mNk: mNk, mTotal: mZ1 + mZ2 + mTilg + mNk,
+    return { hyp1: hyp1, hyp2: hyp2, mZ1: mZ1, mZ2: mZ2, mTilg: mTilg, mNk: mNk, mTotal: mZ1 + mZ2 + mTilg + mNk - d.mietertraegeM,
       bar: bar, tragbarkeit: tragbarkeit,
       mietBruttoM: mietBruttoM, mietBruttoJ: mietBruttoJ, mietNettoM: mietNettoM,
       ekRenditeBrutto: ekRenditeBrutto, bruttorendite: bruttorendite, ekRenditeNetto: ekRenditeNetto };
@@ -507,6 +520,7 @@
     document.getElementById('out-m-zins2').textContent   = fmt(r.mZ2);
     document.getElementById('out-m-tilgung').textContent = fmt(r.mTilg);
     document.getElementById('out-m-nk').textContent      = fmt(r.mNk);
+    document.getElementById('out-mietertraege').textContent = d.mietertraegeM > 0 ? '− ' + fmt(d.mietertraegeM) : fmt(0);
     document.getElementById('out-m-total').textContent   = fmt(r.mTotal);
     var barRow = document.getElementById('bar-row');
     if (r.bar !== null) {
