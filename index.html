@@ -302,6 +302,22 @@
           <span class="brow-value" id="out-m-total">—</span>
         </div>
       </div>
+
+      <div style="border-top:1px solid rgba(255,255,255,0.12);margin-top:1.25rem;padding-top:1.25rem;">
+        <p style="font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.75rem;">Kennzahlen</p>
+        <div class="brow">
+          <span class="brow-label">Bruttorendite <span style="font-size:11px;opacity:0.6;">(Mieterträge / Kaufpreis)</span></span>
+          <span class="brow-value" id="out-kz-bruttorendite">—</span>
+        </div>
+        <div class="brow" style="border-bottom:none;padding-bottom:0;">
+          <span class="brow-label">Eigenkapitalrendite <span style="font-size:11px;opacity:0.6;">(Mieterträge / Eigenkapital)</span></span>
+          <span class="brow-value" id="out-kz-ekrendite">—</span>
+        </div>
+        <div class="brow" style="border-bottom:none;padding-bottom:0;">
+          <span class="brow-label">Netto EK-Rendite <span style="font-size:11px;opacity:0.6;">(Mieterträge − Zins 1 − Zins 2 − NK) / EK</span></span>
+          <span class="brow-value" id="out-kz-ekrendite-netto">—</span>
+        </div>
+      </div>
     </div>
 
     <!-- ERTRÄGE — nur Fremdvermietung -->
@@ -522,6 +538,13 @@
     document.getElementById('out-m-nk').textContent      = fmt(r.mNk);
     document.getElementById('out-mietertraege').textContent = d.mietertraegeM > 0 ? '− ' + fmt(d.mietertraegeM) : fmt(0);
     document.getElementById('out-m-total').textContent   = fmt(r.mTotal);
+    var mietJ = d.mietertraegeM * 12;
+    var bruttorendite = d.kaufpreis > 0 && d.mietertraegeM > 0 ? (mietJ / d.kaufpreis * 100) : null;
+    var ekrendite     = d.eigenkapital > 0 && d.mietertraegeM > 0 ? (mietJ / d.eigenkapital * 100) : null;
+    var ekrenditeNetto = d.eigenkapital > 0 && d.mietertraegeM > 0 ? ((d.mietertraegeM - r.mZ1 - r.mZ2 - r.mNk) * 12 / d.eigenkapital * 100) : null;
+    document.getElementById('out-kz-bruttorendite').textContent  = bruttorendite !== null ? bruttorendite.toFixed(2) + '%' : '—';
+    document.getElementById('out-kz-ekrendite').textContent      = ekrendite !== null ? ekrendite.toFixed(2) + '%' : '—';
+    document.getElementById('out-kz-ekrendite-netto').textContent = ekrenditeNetto !== null ? ekrenditeNetto.toFixed(2) + '%' : '—';
     var barRow = document.getElementById('bar-row');
     if (r.bar !== null) {
       document.getElementById('out-bar').textContent = fmt(r.bar);
